@@ -4,6 +4,7 @@ use dotenv::dotenv;
 use kalypso_generator::models::InputPayload;
 use kalypso_ivs::ivs::{start_ivs_server, IVSTrait};
 use kalypso_ivs::models::*;
+use tokio::fs;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -11,8 +12,13 @@ async fn main() -> Result<()> {
     dotenv().ok();
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
+    let ecies_private_key = match fs::read("/app/secp.sec").await {
+        Ok(key) => key,
+        Err(_) => fs::read("./app/secp.sec").await?,
+    };
+
     let null_confidential_prover = IVS::default();
-    start_ivs_server("0.0.0.0:3030", null_confidential_prover).await?;
+    start_ivs_server("0.0.0.0:3030", null_confidential_prover, ecies_private_key).await?;
 
     Ok(())
 }

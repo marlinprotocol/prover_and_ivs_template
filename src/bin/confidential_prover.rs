@@ -42,6 +42,14 @@ async fn main() -> Result<()> {
 
     // Clone prover_url as it will be moved into the first task.
     let prover_port_clone = prover_port.clone();
+
+    let ecies_private_key = match fs::read("/app/secp.sec").await {
+        Ok(key) => key,
+        Err(_) => fs::read("./app/secp.sec").await?,
+    };
+
+    let ecies_private_key_clone = ecies_private_key.clone();
+
     let handle_1 = tokio::spawn(async move {
         // Parse some environment variables.
         let start_block: u64 = start_block
@@ -59,14 +67,10 @@ async fn main() -> Result<()> {
         // Parse polling_interval using the ? operator so that any error is propagated.
         let polling_interval_val: u64 = polling_interval.parse()?;
 
-        let ecies_private_key = match fs::read("/app/secp.sec").await {
-            Ok(key) => key,
-            Err(_) => fs::read("./app/secp.sec").await?,
-        };
         let listener =
             kalypso_listener::job_creator::JobCreator::simple_listener_for_confidential_prover(
                 generator,
-                hex::encode(ecies_private_key),
+                hex::encode(ecies_private_key_clone),
                 market_id,
                 http_rpc_url,
                 gas_key,
@@ -91,6 +95,7 @@ async fn main() -> Result<()> {
     start_confidential_proving_server(
         format!("localhost:{}", prover_port.to_string()).as_ref(),
         null_confidential_prover,
+        ecies_private_key,
     )
     .await?;
 
