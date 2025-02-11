@@ -1,0 +1,28 @@
+[package]
+name = "prover_and_ivs_template"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-web = {version = "4.5.1", features = ["rustls"] }
+anyhow = "1.0.95"
+async-trait = "0.1.81"
+dotenv = "0.15.0"
+env_logger = "0.11.6"
+hex = "0.4.3"
+kalypso_generator = { git = "https://github.com/marlinprotocol/kalypso-unified.git", branch = "mainnet", package = "generator" }
+kalypso_ivs = { git = "https://github.com/marlinprotocol/kalypso-unified.git", branch = "mainnet", package = "ivs" }
+kalypso_listener = { git = "https://github.com/marlinprotocol/kalypso-unified.git", branch = "mainnet", package = "listener" }
+log = "0.4"
+tokio = { version = "1", features = ["full"] }
+
+
+[profile.dev]
+panic = "abort"
+debug = true
+
+[profile.release]
+strip = true
+lto = true
+panic = "abort"
+codegen-units = 1
