@@ -4,15 +4,20 @@ use tokio::fs;
 
 use std::env;
 
+macro_rules! env_var {
+    ($var:ident, $key:expr) => {
+        let $var = env::var($key).expect(&format!("{} is not set", $key));
+    };
+}
+
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
-    let port: u16 = env::var("GENERATOR_CLIENT_PORT")
-        .unwrap_or_else(|_| "1500".to_string())
-        .parse::<u16>()
-        .expect("GENERATOR_CLIENT_PORT must be a valid number");
+    env_var!(port, "GENERATOR_CLIENT_PORT");
+
+    let port = port.parse().unwrap();
 
     let enclave_key = match fs::read("/app/secp.sec").await {
         Ok(key) => key,
