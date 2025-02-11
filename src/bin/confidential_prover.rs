@@ -5,9 +5,8 @@ use kalypso_generator::generator::GeneratorTrait;
 use kalypso_generator::models::*;
 use kalypso_ivs::ivs::{start_confidential_proving_server, IVSTrait};
 use kalypso_ivs::models::*;
-use tokio::fs;
-
 use std::env;
+use tokio::fs;
 
 macro_rules! env_var {
     ($var:ident, $key:expr) => {
@@ -17,11 +16,9 @@ macro_rules! env_var {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Load environment variables and initialize the logger.
     dotenv().ok();
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
-    // Get environment variables.
     env_var!(generator, "GENERATOR_ADDRESS");
     env_var!(gas_key, "GAS_KEY");
     env_var!(market_id, "MARKET_ID");
@@ -32,15 +29,14 @@ async fn main() -> Result<()> {
     env_var!(max_parallel_proofs, "MAX_PARALLEL_PROOFS");
     env_var!(prover_port, "PROVER_PORT");
     env_var!(polling_interval, "POLLING_INTERVAL");
+    env_var!(prometheus_port, "PROMETHEUS_PORT");
 
     let http_rpc_url = env::var("HTTP_RPC_URL")
         .or_else(|_| env::var("RPC_URL"))
         .expect("HTTP_RPC_URL or RPC_URL is not set");
 
-    // Prepare a vector to hold the task handles.
     let mut handles = vec![];
 
-    // Clone prover_url as it will be moved into the first task.
     let prover_port_clone = prover_port.clone();
 
     let ecies_private_key = match fs::read("/app/secp.sec").await {
@@ -51,7 +47,6 @@ async fn main() -> Result<()> {
     let ecies_private_key_clone = ecies_private_key.clone();
 
     let handle_1 = tokio::spawn(async move {
-        // Parse some environment variables.
         let start_block: u64 = start_block
             .parse()
             .expect("Cannot parse start_block as u64");
@@ -64,8 +59,8 @@ async fn main() -> Result<()> {
             max_parallel_proofs
         );
 
-        // Parse polling_interval using the ? operator so that any error is propagated.
         let polling_interval_val: u64 = polling_interval.parse()?;
+        let prometheus_port = prometheus_port.parse()?;
 
         let listener =
             kalypso_listener::job_creator::JobCreator::simple_listener_for_confidential_prover(
@@ -82,11 +77,10 @@ async fn main() -> Result<()> {
                 false,
                 max_parallel_proofs,
                 false,
-                9999,
+                prometheus_port,
                 polling_interval_val,
             );
 
-        // Run the listener.
         listener.run().await
     });
     handles.push(handle_1);
@@ -115,12 +109,10 @@ struct NullConfProver;
 #[async_trait]
 impl GeneratorTrait for NullConfProver {
     async fn generate_proof(&self, _input: InputPayload) -> GenerateProofResponse {
-        // Actual logic here
         unimplemented!()
     }
 
     async fn benchmark(&self) -> BenchmarkResponse {
-        // Actual logic here
         unimplemented!()
     }
 }
@@ -128,14 +120,12 @@ impl GeneratorTrait for NullConfProver {
 #[async_trait]
 impl IVSTrait for NullConfProver {
     async fn check_inputs(&self, _input: InputPayload) -> CheckInputResponse {
-        // Actual logic here
         unimplemented!()
     }
     async fn check_inputs_and_proof(
         &self,
         _input: VerifyInputsAndProof,
     ) -> VerifyInputAndProofResponse {
-        // Actual Logic Here
         unimplemented!()
     }
 }

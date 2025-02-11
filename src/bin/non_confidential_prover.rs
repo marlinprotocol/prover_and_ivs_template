@@ -13,11 +13,9 @@ macro_rules! env_var {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Load environment variables and initialize the logger.
     dotenv().ok();
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
-    // Get environment variables.
     env_var!(generator, "GENERATOR_ADDRESS");
     env_var!(gas_key, "GAS_KEY");
     env_var!(market_id, "MARKET_ID");
@@ -27,20 +25,19 @@ async fn main() -> Result<()> {
     env_var!(chain_id, "CHAIN_ID");
     env_var!(max_parallel_proofs, "MAX_PARALLEL_PROOFS");
     env_var!(ivs_url, "IVS_URL");
-    env_var!(prover_url, "PROVER_URL");
+    env_var!(prover_port, "PROVER_PORT");
     env_var!(polling_interval, "POLLING_INTERVAL");
+    env_var!(prometheus_port, "PROMETHEUS_PORT");
 
     let http_rpc_url = env::var("HTTP_RPC_URL")
         .or_else(|_| env::var("RPC_URL"))
         .expect("HTTP_RPC_URL or RPC_URL is not set");
 
-    // Prepare a vector to hold the task handles.
     let mut handles = vec![];
 
-    // Clone prover_url as it will be moved into the first task.
-    let prover_url_clone = prover_url.clone();
+    let prover_port_clone = prover_port.clone();
+
     let handle_1 = tokio::spawn(async move {
-        // Parse some environment variables.
         let start_block: u64 = start_block
             .parse()
             .expect("Cannot parse start_block as u64");
@@ -53,10 +50,9 @@ async fn main() -> Result<()> {
             max_parallel_proofs
         );
 
-        // Parse polling_interval using the ? operator so that any error is propagated.
         let polling_interval_val: u64 = polling_interval.parse()?;
+        let prometheus_port = prometheus_port.parse()?;
 
-        // Create a listener with the given configuration.
         let listener =
             kalypso_listener::job_creator::JobCreator::simple_listener_for_non_confidential_prover(
                 generator,
@@ -67,22 +63,25 @@ async fn main() -> Result<()> {
                 generator_registry.into(),
                 start_block,
                 chain_id,
-                prover_url_clone,
+                format!("http://localhost:{}", prover_port_clone),
                 ivs_url,
                 false,
                 max_parallel_proofs,
                 false,
-                9999,
+                prometheus_port,
                 polling_interval_val,
             );
 
-        // Run the listener.
         listener.run().await
     });
     handles.push(handle_1);
 
     let null_prover = NullProver::default();
-    start_non_confidential_proving_server(prover_url.as_ref(), null_prover).await?;
+    start_non_confidential_proving_server(
+        format!("localhost:{}", prover_port).as_ref(),
+        null_prover,
+    )
+    .await?;
 
     for handle in handles {
         handle
@@ -94,19 +93,16 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-// Dummy implementation of the NullProver.
 #[derive(Default)]
 struct NullProver;
 
 #[async_trait]
 impl GeneratorTrait for NullProver {
     async fn generate_proof(&self, _input: InputPayload) -> GenerateProofResponse {
-        // Actual proof generation logic here.
         unimplemented!()
     }
 
     async fn benchmark(&self) -> BenchmarkResponse {
-        // Actual benchmarking logic here.
         unimplemented!()
     }
 }
