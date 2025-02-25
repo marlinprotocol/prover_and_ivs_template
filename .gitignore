@@ -24,3 +24,6 @@ Cargo.lock
 
 generator_config/
 generator_config/*
+
+matching_engine_config/
+matching_engine_config/*
