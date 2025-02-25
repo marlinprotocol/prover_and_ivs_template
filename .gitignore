@@ -21,3 +21,6 @@ Cargo.lock
 #.idea/
 
 .env
+
+generator_config/
+generator_config/*

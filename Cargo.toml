@@ -16,7 +16,7 @@ kalypso_listener = { git = "https://github.com/marlinprotocol/kalypso-unified.gi
 kalypso_generator_client = { git = "https://github.com/marlinprotocol/kalypso-unified.git", branch = "mainnet", package = "generator_client" }
 log = "0.4"
 tokio = { version = "1", features = ["full"] }
-
+serde_json = "1.0.139"
 
 [profile.dev]
 panic = "abort"

@@ -3,10 +3,10 @@ use async_trait::async_trait;
 use dotenv::dotenv;
 use kalypso_generator::generator::GeneratorTrait;
 use kalypso_generator::models::*;
+use kalypso_generator_client::model::{GeneratorConfigFile, RuntimeConfigFile};
 use kalypso_ivs::ivs::{start_confidential_proving_server, IVSTrait};
 use kalypso_ivs::models::*;
-use std::env;
-use tokio::fs;
+use std::{env, fs};
 
 macro_rules! env_var {
     ($var:ident, $key:expr) => {
@@ -19,73 +19,73 @@ async fn main() -> Result<()> {
     dotenv().ok();
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
-    env_var!(generator, "GENERATOR_ADDRESS");
-    env_var!(gas_key, "GAS_KEY");
-    env_var!(market_id, "MARKET_ID");
-    env_var!(proof_market_place, "PROOF_MARKETPLACE_ADDRESS");
-    env_var!(generator_registry, "GENERATOR_REGISTRY_ADDRESS");
-    env_var!(start_block, "START_BLOCK");
-    env_var!(chain_id, "CHAIN_ID");
-    env_var!(max_parallel_proofs, "MAX_PARALLEL_PROOFS");
-    env_var!(prover_port, "PROVER_PORT");
-    env_var!(polling_interval, "POLLING_INTERVAL");
-    env_var!(prometheus_port, "PROMETHEUS_PORT");
-
-    let http_rpc_url = env::var("HTTP_RPC_URL")
-        .or_else(|_| env::var("RPC_URL"))
-        .expect("HTTP_RPC_URL or RPC_URL is not set");
+    env_var!(max_parallel_proofs, "MAX_PARALLEL_PROOFS"); // 1 from env for now
+    env_var!(polling_interval, "POLLING_INTERVAL"); // 10000 from env for now
+    env_var!(prometheus_port, "PROMETHEUS_PORT"); // 9999 from env for now
 
     let mut handles = vec![];
 
-    let prover_port_clone = prover_port.clone();
-
-    let ecies_private_key = match fs::read("/app/secp.sec").await {
-        Ok(key) => key,
-        Err(_) => fs::read("./app/secp.sec").await?,
-    };
-
-    let ecies_private_key_clone = ecies_private_key.clone();
-
     let handle_1 = tokio::spawn(async move {
-        let start_block: u64 = start_block
-            .parse()
-            .expect("Cannot parse start_block as u64");
-        let chain_id: u64 = chain_id.parse().expect("Cannot parse chain_id as u64");
         let max_parallel_proofs: usize = max_parallel_proofs.parse().unwrap_or(1);
-
-        log::info!(
-            "Start Block: {}, Max Parallel Requests: {}",
-            start_block,
-            max_parallel_proofs
-        );
 
         let polling_interval_val: u64 = polling_interval.parse()?;
         let prometheus_port = prometheus_port.parse()?;
 
-        let listener =
-            kalypso_listener::job_creator::JobCreator::simple_listener_for_confidential_prover(
-                generator,
-                hex::encode(ecies_private_key_clone),
-                market_id,
-                http_rpc_url,
-                gas_key,
-                proof_market_place,
-                generator_registry,
-                start_block,
-                chain_id,
-                prover_port_clone,
-                false,
-                max_parallel_proofs,
-                false,
-                prometheus_port,
-                polling_interval_val,
-            );
+        let generator_config_path = "./generator_config/generator_config.json";
+        let runtime_config_path = "./generator_config/runtime_config.json";
+
+        let listener = kalypso_listener::job_creator::JobCreator::from_config_paths(
+            generator_config_path,
+            runtime_config_path,
+            false,
+            max_parallel_proofs,
+            false,
+            prometheus_port,
+            polling_interval_val,
+        )
+        .unwrap();
 
         listener.run().await
     });
     handles.push(handle_1);
 
     let null_confidential_prover = NullConfProver::default();
+
+    let runtime_config_path = "./generator_config/runtime_config.json";
+    let runtime_config_content = fs::read_to_string(runtime_config_path)?;
+    let runtime_config_file: RuntimeConfigFile = serde_json::from_str(&runtime_config_content)?;
+
+    let market_details = runtime_config_file
+        .runtime_config
+        .markets
+        .values()
+        .next()
+        .ok_or("No market details found in runtime config")
+        .unwrap();
+    let prover_port = market_details.port.clone();
+
+    let generator_config_path = "./generator_config/generator_config.json";
+    let generator_config_content = fs::read_to_string(generator_config_path)?;
+    let generator_config_file: GeneratorConfigFile =
+        serde_json::from_str(&generator_config_content)?;
+
+    // Extract the first generator config.
+    let generator_config = generator_config_file
+        .generator_config
+        .get(0)
+        .ok_or("No generator config found")
+        .unwrap();
+
+    // Process ecies_private_key: remove a leading "0x" if present and decode from hex.
+    let mut ecies_key_str = generator_config.ecies_private_key.clone();
+    if ecies_key_str.starts_with("0x") || ecies_key_str.starts_with("0X") {
+        ecies_key_str = ecies_key_str
+            .trim_start_matches("0x")
+            .trim_start_matches("0X")
+            .to_string();
+    }
+    let ecies_private_key = hex::decode(ecies_key_str)?;
+
     start_confidential_proving_server(
         format!("localhost:{}", prover_port.to_string()).as_ref(),
         null_confidential_prover,
