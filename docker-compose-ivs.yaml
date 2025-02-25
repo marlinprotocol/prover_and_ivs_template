@@ -1,0 +1,10 @@
+services:
+  ivs:
+    image: ivs:latest
+    init: true
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      - IVS_PORT=8080
+    volumes:
+      - /app/ecdsa.sec:/app/ecdsa.sec

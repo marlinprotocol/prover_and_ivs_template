@@ -27,3 +27,6 @@ generator_config/*
 
 matching_engine_config/
 matching_engine_config/*
+
+*.tar
+result

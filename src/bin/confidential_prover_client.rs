@@ -21,9 +21,9 @@ async fn main() -> std::io::Result<()> {
 
     let port = port.parse().unwrap();
 
-    let enclave_key = match fs::read("/app/secp.sec").await {
+    let enclave_key = match fs::read("/app/ecdsa.sec").await {
         Ok(key) => key,
-        Err(_) => fs::read("./app/secp.sec").await?,
+        Err(_) => fs::read("./app/ecdsa.sec").await?,
     };
 
     let server = client::GeneratorClient::new(hex::encode(enclave_key), port);
