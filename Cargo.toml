@@ -14,9 +14,11 @@ kalypso_generator = { git = "https://github.com/marlinprotocol/kalypso-unified.g
 kalypso_ivs = { git = "https://github.com/marlinprotocol/kalypso-unified.git", branch = "mainnet", package = "ivs" }
 kalypso_listener = { git = "https://github.com/marlinprotocol/kalypso-unified.git", branch = "mainnet", package = "listener" }
 kalypso_generator_client = { git = "https://github.com/marlinprotocol/kalypso-unified.git", branch = "mainnet", package = "generator_client" }
+kalypso_matching_engine_client = { git = "https://github.com/marlinprotocol/kalypso-unified.git", branch = "mainnet", package = "matching_engine_client" }
+kalypso_matching_engine = { git = "https://github.com/marlinprotocol/kalypso-unified.git", branch = "mainnet", package = "matching_engine" }
 log = "0.4"
 tokio = { version = "1", features = ["full"] }
-
+serde_json = "1.0.139"
 
 [profile.dev]
 panic = "abort"
