@@ -1,0 +1,33 @@
+FROM rust:1.85-bookworm AS builder
+
+WORKDIR /app
+
+COPY Cargo.toml .
+COPY Cargo.lock .
+
+RUN mkdir src && echo "pub fn main() {}" > src/main.rs
+
+RUN cargo build --release
+
+RUN rm -rf src
+
+COPY . .
+
+RUN cargo build --release --bin confidential_prover --bin confidential_prover_client
+
+FROM debian:bookworm-slim
+
+WORKDIR /app
+
+COPY --from=builder /app/target/release/confidential_prover /app/
+COPY --from=builder /app/target/release/confidential_prover_client /app/
+
+RUN echo '#!/bin/bash\n\
+/app/confidential_prover_client & \n\
+/app/confidential_prover\n' > /app/entrypoint.sh
+
+# Make the script executable
+RUN chmod +x /app/entrypoint.sh
+
+# Use the entrypoint script as the container command
+CMD ["/app/entrypoint.sh"]
