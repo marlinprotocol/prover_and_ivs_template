@@ -17,18 +17,18 @@ RUN rm -rf src
 
 COPY . .
 
-RUN cargo build --release --bin confidential_prover --bin confidential_prover_client
+RUN cargo build --release --bin matching_engine --bin matching_engine_client
 
 FROM alpine:latest
 
 WORKDIR /app
 
-COPY --from=builder /app/target/release/confidential_prover /app/
-COPY --from=builder /app/target/release/confidential_prover_client /app/
+COPY --from=builder /app/target/release/matching_engine /app/
+COPY --from=builder /app/target/release/matching_engine_client /app/
 
 COPY --from=builder /app/supervisord /app/supervisord
 
-COPY supervisord-cp.conf /etc/supervisord.conf
+COPY supervisord-me.conf /etc/supervisord.conf
 
 RUN chmod +x /app/supervisord
 

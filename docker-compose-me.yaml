@@ -1,0 +1,11 @@
+services:
+  me:
+    image: me:latest
+    init: true
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      - PORT=5000
+      - INDEXER_PORT=3000
+    volumes:
+      - /app/ecdsa.sec:/app/ecdsa.sec

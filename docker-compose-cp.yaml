@@ -1,6 +1,6 @@
 services:
-  confidential-prover:
-    image: confidential-prover:latest
+  cp:
+    image: cp:latest
     init: true
     network_mode: host
     restart: unless-stopped
