@@ -29,9 +29,3 @@ strip = true
 lto = true
 panic = "abort"
 codegen-units = 1
-
-[build]
-target = "x86_64-unknown-linux-musl"
-
-[target.'cfg(target_os = "linux")']
-rustflags = ["-C", "target-feature=+crt-static"]
