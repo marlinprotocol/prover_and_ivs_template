@@ -28,19 +28,11 @@ async fn main() -> Result<()> {
     let generator_config_path = "/app/generator_config/generator_config.json";
     let runtime_config_path = "/app/generator_config/runtime_config.json";
 
-    // Poll until both config files exist
-    loop {
-        let generator_exists = std::path::Path::new(generator_config_path).exists();
-        let runtime_exists = std::path::Path::new(runtime_config_path).exists();
+    let generator_exists = std::path::Path::new(generator_config_path).exists();
+    let runtime_exists = std::path::Path::new(runtime_config_path).exists();
 
-        if generator_exists && runtime_exists {
-            println!("Generator and runtime config files found");
-            break;
-        }
-
-        println!("Waiting for generator and runtime config files to be created...");
-
-        tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+    if !generator_exists || !runtime_exists {
+        panic!("Generator or runtime config files not found");
     }
 
     let handle_1 = tokio::spawn(async move {
