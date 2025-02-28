@@ -21,6 +21,6 @@ FROM alpine:latest
 
 WORKDIR /app
 
-COPY --from=builder /app/target/release/ivs /app/
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/ivs /app/
 
 ENTRYPOINT [ "/app/ivs" ]

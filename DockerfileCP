@@ -23,8 +23,8 @@ FROM alpine:latest
 
 WORKDIR /app
 
-COPY --from=builder /app/target/release/confidential_prover /app/
-COPY --from=builder /app/target/release/confidential_prover_client /app/
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/confidential_prover /app/
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/confidential_prover_client /app/
 
 COPY --from=builder /app/supervisord /app/supervisord
 
