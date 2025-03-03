@@ -14,9 +14,9 @@ async fn main() -> std::io::Result<()> {
         .parse::<u16>()
         .expect("PORT must be a valid number");
 
-    let enclave_key = match fs::read("/app/secp.sec").await {
+    let enclave_key = match fs::read("/app/ecdsa.sec").await {
         Ok(key) => key,
-        Err(_) => fs::read("./app/secp.sec").await?,
+        Err(_) => fs::read("./app/ecdsa.sec").await?,
     };
 
     let server = client::MatchingEngineClient::new(hex::encode(enclave_key), port);

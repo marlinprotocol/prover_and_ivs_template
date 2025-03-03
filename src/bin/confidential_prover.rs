@@ -25,14 +25,21 @@ async fn main() -> Result<()> {
 
     let mut handles = vec![];
 
+    let generator_config_path = "/app/generator_config/generator_config.json";
+    let runtime_config_path = "/app/generator_config/runtime_config.json";
+
+    let generator_exists = std::path::Path::new(generator_config_path).exists();
+    let runtime_exists = std::path::Path::new(runtime_config_path).exists();
+
+    if !generator_exists || !runtime_exists {
+        panic!("Generator or runtime config files not found");
+    }
+
     let handle_1 = tokio::spawn(async move {
         let max_parallel_proofs: usize = max_parallel_proofs.parse().unwrap_or(1);
 
         let polling_interval_val: u64 = polling_interval.parse()?;
         let prometheus_port = prometheus_port.parse()?;
-
-        let generator_config_path = "./generator_config/generator_config.json";
-        let runtime_config_path = "./generator_config/runtime_config.json";
 
         let listener = kalypso_listener::job_creator::JobCreator::from_config_paths(
             generator_config_path,
@@ -51,7 +58,6 @@ async fn main() -> Result<()> {
 
     let null_confidential_prover = NullConfProver::default();
 
-    let runtime_config_path = "./generator_config/runtime_config.json";
     let runtime_config_content = fs::read_to_string(runtime_config_path)?;
     let runtime_config_file: RuntimeConfigFile = serde_json::from_str(&runtime_config_content)?;
 
@@ -64,7 +70,6 @@ async fn main() -> Result<()> {
         .unwrap();
     let prover_port = market_details.port.clone();
 
-    let generator_config_path = "./generator_config/generator_config.json";
     let generator_config_content = fs::read_to_string(generator_config_path)?;
     let generator_config_file: GeneratorConfigFile =
         serde_json::from_str(&generator_config_content)?;
@@ -87,7 +92,7 @@ async fn main() -> Result<()> {
     let ecies_private_key = hex::decode(ecies_key_str)?;
 
     start_confidential_proving_server(
-        format!("localhost:{}", prover_port.to_string()).as_ref(),
+        format!("0.0.0.0:{}", prover_port.to_string()).as_ref(),
         null_confidential_prover,
         ecies_private_key,
     )

@@ -17,13 +17,17 @@ async fn main() -> std::io::Result<()> {
 
     env_var!(port, "GENERATOR_CLIENT_PORT"); //5000 comes from env
     env_var!(_supervisord_path, "SUPERVISORD_PATH"); // ./app/supervisord comes from env
-    env_var!(_generator_patj, "GENERATOR_PATH"); // confidential_prover comes from env
 
     let port = port.parse().unwrap();
 
-    let enclave_key = match fs::read("/app/secp.sec").await {
+    let enclave_key = match fs::read("/app/ecdsa.sec").await {
         Ok(key) => key,
-        Err(_) => fs::read("./app/secp.sec").await?,
+        Err(_) => match fs::read("./app/ecdsa.sec").await {
+            Ok(key) => key,
+            Err(_) => {
+                panic!("ecdsa.sec not found.");
+            }
+        },
     };
 
     let server = client::GeneratorClient::new(hex::encode(enclave_key), port);

@@ -1,0 +1,15 @@
+services:
+  cp:
+    image: cp:latest
+    init: true
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      - GENERATOR_CLIENT_PORT=5000
+      - SUPERVISORD_PATH=/app/supervisord
+      - MAX_PARALLEL_PROOFS=1
+      - POLLING_INTERVAL=10000
+      - PROMETHEUS_PORT=9999
+      - SKIP_VERIFICATION=true
+    volumes:
+      - /app/ecdsa.sec:/app/ecdsa.sec

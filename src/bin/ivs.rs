@@ -19,9 +19,9 @@ async fn main() -> Result<()> {
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
     env_var!(ivs_port, "IVS_PORT");
-    let ecies_private_key = match fs::read("/app/secp.sec").await {
+    let ecies_private_key = match fs::read("/app/ecdsa.sec").await {
         Ok(key) => key,
-        Err(_) => fs::read("./app/secp.sec").await?,
+        Err(_) => fs::read("./app/ecdsa.sec").await?,
     };
 
     let null_confidential_prover = IVS::default();

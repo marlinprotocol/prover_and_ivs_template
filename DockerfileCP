@@ -1,0 +1,36 @@
+FROM rust:1.85-alpine AS builder
+
+WORKDIR /app
+
+RUN apk update && apk add --no-cache curl net-tools wget musl-dev openssl-dev perl gcc make
+
+RUN wget -O supervisord http://public.artifacts.marlin.pro/projects/enclaves/supervisord_master_linux_amd64
+
+COPY Cargo.toml .
+COPY Cargo.lock .
+COPY .cargo .
+
+RUN mkdir src && echo "pub fn main() {}" > src/main.rs
+
+RUN cargo build --release
+
+RUN rm -rf src
+
+COPY . .
+
+RUN cargo build --release --bin confidential_prover --bin confidential_prover_client
+
+FROM alpine:latest
+
+WORKDIR /app
+
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/confidential_prover /app/
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/confidential_prover_client /app/
+
+COPY --from=builder /app/supervisord /app/supervisord
+
+COPY supervisord-cp.conf /etc/supervisord.conf
+
+RUN chmod +x /app/supervisord
+
+ENTRYPOINT [ "/app/supervisord" ]
