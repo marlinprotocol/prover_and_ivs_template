@@ -8,6 +8,7 @@ RUN wget -O supervisord http://public.artifacts.marlin.pro/projects/enclaves/sup
 
 COPY Cargo.toml .
 COPY Cargo.lock .
+COPY .cargo .
 
 RUN mkdir src && echo "pub fn main() {}" > src/main.rs
 
