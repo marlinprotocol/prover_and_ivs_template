@@ -10,3 +10,5 @@ target/
 result
 
 scripts/*
+
+*.log

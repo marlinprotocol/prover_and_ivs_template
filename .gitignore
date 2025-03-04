@@ -26,3 +26,5 @@ matching_engine_config/*
 
 *.tar
 result*
+
+*.log
