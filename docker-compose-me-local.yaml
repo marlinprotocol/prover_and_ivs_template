@@ -1,0 +1,16 @@
+services:
+  me:
+    image: me:latest
+    init: true
+    ports:
+      - 5000:5000
+      - 3000:3000
+    restart: unless-stopped
+    environment:
+      - PORT=5000
+      - INDEXER_PORT=3000
+      - MATCHING_ENGINE_PATH=matching_engine
+      - SUPERVISORD_PATH=/app/supervisord
+      - SKIP_VERIFICATION=true
+    volumes:
+      - ./app/ecdsa.sec:/app/ecdsa.sec
