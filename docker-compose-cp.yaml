@@ -10,6 +10,5 @@ services:
       - MAX_PARALLEL_PROOFS=1
       - POLLING_INTERVAL=10000
       - PROMETHEUS_PORT=9999
-      - SKIP_VERIFICATION=true
     volumes:
       - /app/ecdsa.sec:/app/ecdsa.sec

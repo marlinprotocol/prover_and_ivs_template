@@ -9,6 +9,5 @@ services:
       - INDEXER_PORT=3000
       - MATCHING_ENGINE_PATH=matching_engine
       - SUPERVISORD_PATH=/app/supervisord
-      - SKIP_VERIFICATION=true
     volumes:
       - /app/ecdsa.sec:/app/ecdsa.sec
