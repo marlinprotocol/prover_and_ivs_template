@@ -116,8 +116,8 @@ struct NoirProver {
 impl NoirProver {
     fn new() -> Self {
         Self {
-            toml_path: "/home/ubuntu/noir_enclave_setup/hello_world".to_string(),
-            output_path: "/home/ubuntu/noir_enclave_setup/hello_world/target/hello_world.proof"
+            toml_path: "/app/noir_enclave_setup/hello_world".to_string(),
+            output_path: "/app/noir_enclave_setup/hello_world/target/hello_world.proof"
                 .to_string(),
             lock: tokio::sync::Mutex::new(()),
         }
@@ -268,7 +268,7 @@ async fn get_signed_proof(
     proof: Bytes,
 ) -> Result<Bytes, Box<dyn std::error::Error>> {
     // Read the secp256k1 private key from file
-    let read_secp_private_key = fs::read("./app/ecdsa.sec").expect("/app/ecdsa.sec file not found");
+    let read_secp_private_key = fs::read("/app/ecdsa.sec").expect("/app/ecdsa.sec file not found");
     let secp_private_key = secp256k1::SecretKey::from_slice(&read_secp_private_key)
         .expect("Failed reading secp_private_key get_signed_proof()")
         .display_secret()

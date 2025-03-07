@@ -43,6 +43,8 @@ RUN echo 'export PATH="$HOME/.bb:$PATH"' >> ~/.bashrc && \
 
 WORKDIR /app
 
+RUN git clone https://github.com/marlinprotocol/noir_enclave_setup.git
+
 COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/confidential_prover /app/
 COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/confidential_prover_client /app/
 
