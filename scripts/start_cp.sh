@@ -45,8 +45,8 @@ make_request "http://$IP:5000/api/generatorConfigSetup" "POST" '{
       "private_key": "0x1111111111111111111111111111111111111111111111111111111111111111",
       "proof_market_place": "0xC05d689B341d84900f0d0CE36f35aDAbfB57F68d",
       "generator_registry": "0x4743a2c7a96C9FBED8b7eAD980aD01822F9711Db",
-      "start_block": 100,
-      "chain_id": 1,
+      "start_block": 130112284,
+      "chain_id": 421614,
       "payment_token": "0x8230d71d809718132C2054704F5E3aF1b86B669C",
       "staking_token": "0xB5570D4D39dD20F61dEf7C0d6846790360b89a18",
       "attestation_verifier": "0xB5570D4D39dD20F61dEf7C0d6846790360b89a18",
@@ -54,7 +54,7 @@ make_request "http://$IP:5000/api/generatorConfigSetup" "POST" '{
       "markets": {
         "1": {
           "port": "8080",
-          "ivs_url": "http://ivs.market1.com"
+          "ivs_url": "http://localhost:8000"
         }
       }
     }

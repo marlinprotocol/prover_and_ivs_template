@@ -141,7 +141,20 @@ impl GeneratorTrait for NoirProver {
     }
 
     async fn benchmark(&self) -> BenchmarkResponse {
-        unimplemented!()
+        let start_time = std::time::Instant::now();
+        let public = vec![];
+        let plain_secrets = vec![];
+        let inputs = InputPayload::from_plain_secrets(public, plain_secrets);
+        write_private_inputs_to_toml(inputs.clone(), &self.toml_path).unwrap();
+        execute_prove_command(inputs, &self.toml_path, &self.output_path)
+            .await
+            .unwrap();
+        let elapsed_time = start_time.elapsed().as_millis();
+        
+        BenchmarkResponse {
+            data: "Success".to_string(),
+            time_in_ms: elapsed_time as u128,
+        }
     }
 }
 
