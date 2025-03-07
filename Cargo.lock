@@ -1768,7 +1768,7 @@ dependencies = [
 [[package]]
 name = "foundry-contracts"
 version = "0.1.0"
-source = "git+https://github.com/marlinprotocol/kalypso-unified.git?branch=beta#22aa7d5a18711628a078b27d70ac75d0dfc6d390"
+source = "git+https://github.com/marlinprotocol/kalypso-unified.git?branch=beta#abb2c579002da7859b98709e8f85b646ae67f074"
 dependencies = [
  "ethers",
  "serde",
@@ -1911,7 +1911,7 @@ dependencies = [
 [[package]]
 name = "generator"
 version = "0.1.0"
-source = "git+https://github.com/marlinprotocol/kalypso-unified.git?branch=beta#22aa7d5a18711628a078b27d70ac75d0dfc6d390"
+source = "git+https://github.com/marlinprotocol/kalypso-unified.git?branch=beta#abb2c579002da7859b98709e8f85b646ae67f074"
 dependencies = [
  "actix-web",
  "async-trait",
@@ -1929,7 +1929,7 @@ dependencies = [
 [[package]]
 name = "generator_client"
 version = "0.1.0"
-source = "git+https://github.com/marlinprotocol/kalypso-unified.git?branch=beta#22aa7d5a18711628a078b27d70ac75d0dfc6d390"
+source = "git+https://github.com/marlinprotocol/kalypso-unified.git?branch=beta#abb2c579002da7859b98709e8f85b646ae67f074"
 dependencies = [
  "actix-web",
  "anyhow",
@@ -2137,7 +2137,7 @@ checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 [[package]]
 name = "helper"
 version = "0.1.0"
-source = "git+https://github.com/marlinprotocol/kalypso-unified.git?branch=beta#22aa7d5a18711628a078b27d70ac75d0dfc6d390"
+source = "git+https://github.com/marlinprotocol/kalypso-unified.git?branch=beta#abb2c579002da7859b98709e8f85b646ae67f074"
 dependencies = [
  "actix-cors",
  "actix-extensible-rate-limit",
@@ -2756,7 +2756,7 @@ checksum = "4a5f13b858c8d314ee3e8f639011f7ccefe71f97f96e50151fb991f267928e2c"
 [[package]]
 name = "ivs"
 version = "0.1.0"
-source = "git+https://github.com/marlinprotocol/kalypso-unified.git?branch=beta#22aa7d5a18711628a078b27d70ac75d0dfc6d390"
+source = "git+https://github.com/marlinprotocol/kalypso-unified.git?branch=beta#abb2c579002da7859b98709e8f85b646ae67f074"
 dependencies = [
  "actix-web",
  "async-trait",
@@ -2943,7 +2943,7 @@ checksum = "6db9c683daf087dc577b7506e9695b3d556a9f3849903fa28186283afd6809e9"
 [[package]]
 name = "listener"
 version = "0.1.0"
-source = "git+https://github.com/marlinprotocol/kalypso-unified.git?branch=beta#22aa7d5a18711628a078b27d70ac75d0dfc6d390"
+source = "git+https://github.com/marlinprotocol/kalypso-unified.git?branch=beta#abb2c579002da7859b98709e8f85b646ae67f074"
 dependencies = [
  "actix-web",
  "anyhow",
@@ -3017,7 +3017,7 @@ checksum = "30bde2b3dc3671ae49d8e2e9f044c7c005836e7a023ee57cffa25ab82764bb9e"
 [[package]]
 name = "matching_engine"
 version = "0.1.0"
-source = "git+https://github.com/marlinprotocol/kalypso-unified.git?branch=beta#22aa7d5a18711628a078b27d70ac75d0dfc6d390"
+source = "git+https://github.com/marlinprotocol/kalypso-unified.git?branch=beta#abb2c579002da7859b98709e8f85b646ae67f074"
 dependencies = [
  "actix-web",
  "anyhow",
@@ -3050,7 +3050,7 @@ dependencies = [
 [[package]]
 name = "matching_engine_client"
 version = "0.1.0"
-source = "git+https://github.com/marlinprotocol/kalypso-unified.git?branch=beta#22aa7d5a18711628a078b27d70ac75d0dfc6d390"
+source = "git+https://github.com/marlinprotocol/kalypso-unified.git?branch=beta#abb2c579002da7859b98709e8f85b646ae67f074"
 dependencies = [
  "actix-web",
  "anyhow",

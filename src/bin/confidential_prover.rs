@@ -117,8 +117,7 @@ impl NoirProver {
     fn new() -> Self {
         Self {
             toml_path: "/app/noir_enclave_setup/hello_world".to_string(),
-            output_path: "/app/noir_enclave_setup/hello_world/target/hello_world.proof"
-                .to_string(),
+            output_path: "/app/noir_enclave_setup/hello_world/target/hello_world.proof".to_string(),
             lock: tokio::sync::Mutex::new(()),
         }
     }
@@ -142,15 +141,18 @@ impl GeneratorTrait for NoirProver {
 
     async fn benchmark(&self) -> BenchmarkResponse {
         let start_time = std::time::Instant::now();
-        let public = vec![];
-        let plain_secrets = vec![];
+
+        let public = vec![97, 98, 99];
+        let plain_secrets = vec![
+            123, 34, 120, 34, 58, 34, 49, 34, 44, 34, 121, 34, 58, 34, 50, 34, 125,
+        ];
         let inputs = InputPayload::from_plain_secrets(public, plain_secrets);
         write_private_inputs_to_toml(inputs.clone(), &self.toml_path).unwrap();
         execute_prove_command(inputs, &self.toml_path, &self.output_path)
             .await
             .unwrap();
         let elapsed_time = start_time.elapsed().as_millis();
-        
+
         BenchmarkResponse {
             data: "Success".to_string(),
             time_in_ms: elapsed_time as u128,

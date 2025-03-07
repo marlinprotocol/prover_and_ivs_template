@@ -54,7 +54,7 @@ make_request "http://$IP:5000/api/generatorConfigSetup" "POST" '{
       "markets": {
         "1": {
           "port": "8080",
-          "ivs_url": "http://localhost:8000"
+          "ivs_url": "http://localhost:8080"
         }
       }
     }
