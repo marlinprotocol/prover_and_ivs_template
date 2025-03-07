@@ -56,7 +56,7 @@ async fn main() -> Result<()> {
     });
     handles.push(handle_1);
 
-    let null_confidential_prover = NullConfProver::default();
+    let null_confidential_prover = NoirProver::new();
 
     let runtime_config_content = fs::read_to_string(runtime_config_path)?;
     let runtime_config_file: RuntimeConfigFile = serde_json::from_str(&runtime_config_content)?;
@@ -107,14 +107,37 @@ async fn main() -> Result<()> {
     println!("All tasks completed or shutdown.");
     Ok(())
 }
+struct NoirProver {
+    toml_path: String,
+    output_path: String,
+    lock: tokio::sync::Mutex<()>,
+}
 
-#[derive(Default)]
-struct NullConfProver;
+impl NoirProver {
+    fn new() -> Self {
+        Self {
+            toml_path: "/home/ubuntu/noir_enclave_setup/hello_world".to_string(),
+            output_path: "/home/ubuntu/noir_enclave_setup/hello_world/target/hello_world.proof"
+                .to_string(),
+            lock: tokio::sync::Mutex::new(()),
+        }
+    }
+}
 
 #[async_trait]
-impl GeneratorTrait for NullConfProver {
-    async fn generate_proof(&self, _input: InputPayload) -> GenerateProofResponse {
-        unimplemented!()
+impl GeneratorTrait for NoirProver {
+    async fn generate_proof(&self, inputs: InputPayload) -> GenerateProofResponse {
+        let _lock = self.lock.lock().await;
+        write_private_inputs_to_toml(inputs.clone(), &self.toml_path).unwrap();
+        let proof_path = execute_prove_command(inputs.clone(), &self.toml_path, &self.output_path)
+            .await
+            .unwrap();
+        let file_contents = fs::read(proof_path).unwrap();
+        let file_bytes = Bytes::from(file_contents);
+        let proof_data = get_signed_proof(inputs.clone(), file_bytes).await.unwrap();
+        return GenerateProofResponse {
+            proof: proof_data.to_vec(),
+        };
     }
 
     async fn benchmark(&self) -> BenchmarkResponse {
@@ -123,14 +146,151 @@ impl GeneratorTrait for NullConfProver {
 }
 
 #[async_trait]
-impl IVSTrait for NullConfProver {
+impl IVSTrait for NoirProver {
     async fn check_inputs(&self, _input: InputPayload) -> CheckInputResponse {
-        unimplemented!()
+        CheckInputResponse { valid: true }
     }
     async fn check_inputs_and_proof(
         &self,
         _input: VerifyInputsAndProof,
     ) -> VerifyInputAndProofResponse {
-        unimplemented!()
+        VerifyInputAndProofResponse {
+            is_input_and_proof_valid: true,
+        }
     }
+}
+
+use std::fs::File;
+use std::io::Write;
+use std::io::{Error, ErrorKind};
+use std::process::{Command, Stdio};
+
+async fn execute_prove_command(
+    _inputs: InputPayload,
+    toml_path: &str,
+    output_path: &str,
+) -> Result<String, Error> {
+    let toml_file_path = format!("{}/{}.toml", toml_path, "temp");
+
+    let witness = "foo";
+
+    let mut cmd = Command::new("nargo");
+    cmd.arg("execute")
+        .arg("-p")
+        .arg(&toml_file_path)
+        .arg(&witness)
+        .current_dir(toml_path)
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped());
+
+    // // Execute the command asynchronously
+    let output = cmd.output()?;
+    // Check if the command was successful
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(Error::new(
+            ErrorKind::Other,
+            format!("Command failed: {}", stderr),
+        ));
+    }
+    // bb prove -b ./target/hello_world.json -w ./target/witness-name.gz -o ./target/proof
+    let output_file_path = output_path.to_string();
+    let json_file_path = format!("{}/target/hello_world.json", toml_path);
+    let witness_file_path = format!("{}/target/{}.gz", toml_path, witness);
+    let mut cmd_bb = Command::new("bb");
+    cmd_bb
+        .arg("prove")
+        .arg("-b")
+        .arg(&json_file_path)
+        .arg("-w")
+        .arg(&witness_file_path)
+        .arg("-o")
+        .arg(&output_file_path)
+        .current_dir(toml_path)
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped());
+
+    // Execute the command asynchronously
+    let output_bb = cmd_bb.output()?;
+    // Check if the command was successful
+    if !output_bb.status.success() {
+        let stderr = String::from_utf8_lossy(&output_bb.stderr);
+        return Err(Error::new(
+            ErrorKind::Other,
+            format!("Command failed: {}", stderr),
+        ));
+    }
+
+    Ok(output_file_path)
+}
+
+use serde_json::Value;
+fn write_private_inputs_to_toml(
+    payload: InputPayload,
+    toml_path: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
+    // let ask_id = inputs.ask_id;
+    // println!("{}",payload.get_plain_secrets().unwrap());
+    let file_path = format!("{}/{}.toml", toml_path, "temp");
+
+    // Convert Vec<u8> to String
+    let json_string = String::from_utf8(payload.get_plain_secrets().unwrap())?;
+
+    // Deserialize JSON string to serde_json::Value
+    let json_value: Value = serde_json::from_str(&json_string)?;
+
+    // Convert serde_json::Value to a TOML string
+    let toml_string = toml::to_string(&json_value)?;
+
+    // Write the TOML string to a file
+    let mut file = File::create(file_path)?;
+    file.write_all(toml_string.as_bytes())?;
+
+    Ok(())
+}
+
+use ethers::prelude::*;
+async fn get_signed_proof(
+    inputs: InputPayload,
+    proof: Bytes,
+) -> Result<Bytes, Box<dyn std::error::Error>> {
+    // Read the secp256k1 private key from file
+    let read_secp_private_key = fs::read("./app/ecdsa.sec").expect("/app/ecdsa.sec file not found");
+    let secp_private_key = secp256k1::SecretKey::from_slice(&read_secp_private_key)
+        .expect("Failed reading secp_private_key get_signed_proof()")
+        .display_secret()
+        .to_string();
+    let signer_wallet = secp_private_key
+        .parse::<LocalWallet>()
+        .expect("Failed creating signer_wallet get_signed_proof()");
+
+    // Prepare the data for signing
+    // let public_inputs = inputs.ask.prover_data.clone();
+    let public_inputs: ethers::types::Bytes = inputs.clone().get_public().into();
+    let proof_bytes = proof.clone();
+    println!("{:?}", &proof_bytes);
+
+    // Encode the data for signing
+    let value = vec![
+        ethers::abi::Token::Bytes(public_inputs.to_vec()),
+        ethers::abi::Token::Bytes(proof_bytes.to_vec()),
+    ];
+    let encoded = ethers::abi::encode(&value);
+    let digest = ethers::utils::keccak256(encoded);
+
+    // Sign the message digest
+    let signature = signer_wallet
+        .sign_message(ethers::types::H256(digest))
+        .await
+        .expect("Failed creating signature get_signed_proof()");
+
+    let sig_bytes: Bytes = signature.to_vec().into();
+    // Encode the proof response
+    let value = vec![
+        ethers::abi::Token::Bytes(public_inputs.to_vec()),
+        ethers::abi::Token::Bytes(proof_bytes.to_vec()),
+        ethers::abi::Token::Bytes(sig_bytes.to_vec()),
+    ];
+    let encoded = ethers::abi::encode(&value);
+    Ok(encoded.into())
 }

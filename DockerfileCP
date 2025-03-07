@@ -20,7 +20,26 @@ COPY . .
 
 RUN cargo build --release --bin confidential_prover --bin confidential_prover_client
 
-FROM alpine:latest
+FROM ubuntu:22.04
+
+RUN apt-get update && apt-get install -y \
+    net-tools iptables iproute2 wget bash git curl \
+    libc++1 libc++abi1 jq && \
+    rm -rf /var/lib/apt/lists/*
+    
+# Install noirup
+RUN curl -L https://raw.githubusercontent.com/noir-lang/noirup/main/install | bash
+
+# Add noirup directory to PATH and ensure it's sourced
+ENV PATH="/root/.nargo/bin:${PATH}"
+RUN echo 'export PATH="$HOME/.nargo/bin:$PATH"' >> ~/.bashrc && \
+    bash -c "source ~/.profile && noirup --version 0.31.0"
+    
+RUN curl -L https://raw.githubusercontent.com/AztecProtocol/aztec-packages/master/barretenberg/cpp/installation/install | bash
+
+ENV PATH="/root/.bb:${PATH}"
+RUN echo 'export PATH="$HOME/.bb:$PATH"' >> ~/.bashrc && \
+    bash -c "source ~/.profile && bbup -v 0.41.0"
 
 WORKDIR /app
 

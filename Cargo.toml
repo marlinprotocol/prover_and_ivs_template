@@ -9,15 +9,18 @@ anyhow = "1.0.95"
 async-trait = "0.1.81"
 dotenv = "0.15.0"
 env_logger = "0.11.6"
+ethers = { version = "2", features = ["rustls"] }
 hex = "0.4.3"
-kalypso_generator = { git = "https://github.com/marlinprotocol/kalypso-unified.git", branch = "mainnet", package = "generator" }
-kalypso_ivs = { git = "https://github.com/marlinprotocol/kalypso-unified.git", branch = "mainnet", package = "ivs" }
-kalypso_listener = { git = "https://github.com/marlinprotocol/kalypso-unified.git", branch = "mainnet", package = "listener" }
-kalypso_generator_client = { git = "https://github.com/marlinprotocol/kalypso-unified.git", branch = "mainnet", package = "generator_client" }
-kalypso_matching_engine_client = { git = "https://github.com/marlinprotocol/kalypso-unified.git", branch = "mainnet", package = "matching_engine_client" }
-kalypso_matching_engine = { git = "https://github.com/marlinprotocol/kalypso-unified.git", branch = "mainnet", package = "matching_engine" }
+kalypso_generator = { git = "https://github.com/marlinprotocol/kalypso-unified.git", branch = "beta", package = "generator" }
+kalypso_ivs = { git = "https://github.com/marlinprotocol/kalypso-unified.git", branch = "beta", package = "ivs" }
+kalypso_listener = { git = "https://github.com/marlinprotocol/kalypso-unified.git", branch = "beta", package = "listener" }
+kalypso_generator_client = { git = "https://github.com/marlinprotocol/kalypso-unified.git", branch = "beta", package = "generator_client" }
+kalypso_matching_engine_client = { git = "https://github.com/marlinprotocol/kalypso-unified.git", branch = "beta", package = "matching_engine_client" }
+kalypso_matching_engine = { git = "https://github.com/marlinprotocol/kalypso-unified.git", branch = "beta", package = "matching_engine" }
 log = "0.4"
 tokio = { version = "1", features = ["full"] }
+toml = "0.8"
+secp256k1 = "0.30"
 serde_json = "1.0.139"
 
 [profile.dev]
