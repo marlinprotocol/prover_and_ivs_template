@@ -43,7 +43,9 @@ RUN echo 'export PATH="$HOME/.bb:$PATH"' >> ~/.bashrc && \
 
 WORKDIR /app
 
+# Clone the repo and copy+paste the main circuit directory as my_application
 RUN git clone https://github.com/marlinprotocol/noir_enclave_setup.git
+RUN cp -r noir_enclave_setup/hello_world ./my_application
 
 COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/confidential_prover /app/
 COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/confidential_prover_client /app/
