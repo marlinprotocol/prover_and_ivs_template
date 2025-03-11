@@ -163,7 +163,25 @@ impl GeneratorTrait for NoirProver {
 #[async_trait]
 impl IVSTrait for NoirProver {
     async fn check_inputs(&self, _input: InputPayload) -> CheckInputResponse {
-        CheckInputResponse { valid: true }
+        
+        let _lock = self.lock.lock().await;
+        
+        write_private_inputs_to_toml(_input.clone(), &self.toml_path).unwrap();
+        let witness: &str = "foo";
+        let toml_file_path: String = format!("{}/{}.toml", self.toml_path, "temp");
+        
+        match execute_witness_command(&self.toml_path, &toml_file_path, &witness).await {
+            Ok(false) => return CheckInputResponse {
+                valid: false,
+            },
+            Err(_) => return CheckInputResponse {
+                valid: false,
+            },
+            Ok(true) => CheckInputResponse {
+                valid: true,
+            }
+        }
+        
     }
     async fn check_inputs_and_proof(
         &self,
@@ -180,15 +198,12 @@ use std::io::Write;
 use std::io::{Error, ErrorKind};
 use std::process::{Command, Stdio};
 
-async fn execute_prove_command(
-    _inputs: InputPayload,
+async fn execute_witness_command(
     toml_path: &str,
-    output_path: &str,
-) -> Result<String, Error> {
-    let toml_file_path = format!("{}/{}.toml", toml_path, "temp");
-
-    let witness = "foo";
-
+    toml_file_path: &str,
+    witness: &str,
+) -> Result<bool, Error> 
+{
     let mut cmd = Command::new("nargo");
     cmd.arg("execute")
         .arg("-p")
@@ -208,6 +223,24 @@ async fn execute_prove_command(
             format!("Command failed: {}", stderr),
         ));
     }
+    return Ok(true);
+}
+
+async fn execute_prove_command(
+    _inputs: InputPayload,
+    toml_path: &str,
+    output_path: &str,
+) -> Result<String, Error> {
+    let toml_file_path = format!("{}/{}.toml", toml_path, "temp");
+
+    let witness = "foo";
+
+    match execute_witness_command(toml_path, &toml_file_path, &witness).await {
+        Ok(false) => return Err(Error::new(ErrorKind::Other, "Witness command failed")),
+        Err(e) => return Err(e), // Propagate the original error
+        Ok(true) => {} // Continue execution
+    }
+    
     // bb prove -b ./target/hello_world.json -w ./target/witness-name.gz -o ./target/proof
     let output_file_path = output_path.to_string();
     let json_file_path = format!("{}/target/hello_world.json", toml_path);
