@@ -32,32 +32,34 @@ make_request() {
 
 # POST request with JSON payload
 make_request "http://$IP:5000/api/generatorConfigSetup" "POST" '{
-    "generator_config": [
-      {
-        "address": "0x31136b0076a21d3d363502a135ad9b0e8c82ea14",
-        "data": "sample payload data",
-        "supported_markets": ["1"]
-      }
-    ],
-    "runtime_config": {
-      "ws_url": "wss://arbitrum-sepolia-rpc.publicnode.com",
-      "http_url": "https://sepolia-rollup.arbitrum.io/rpc",
-      "private_key": "0x1111111111111111111111111111111111111111111111111111111111111111",
-      "proof_market_place": "0xC05d689B341d84900f0d0CE36f35aDAbfB57F68d",
-      "generator_registry": "0x4743a2c7a96C9FBED8b7eAD980aD01822F9711Db",
-      "start_block": 130112284,
-      "chain_id": 421614,
-      "payment_token": "0x8230d71d809718132C2054704F5E3aF1b86B669C",
-      "staking_token": "0xB5570D4D39dD20F61dEf7C0d6846790360b89a18",
-      "attestation_verifier": "0xB5570D4D39dD20F61dEf7C0d6846790360b89a18",
-      "entity_registry": "0x457D42573096b339bA48Be576e9Db4Fc5F186091",
-      "markets": {
-        "1": {
-          "port": "8080",
-          "ivs_url": "http://localhost:8080"
-        }
+  "generator_config": [
+    {
+      "address": "0xc6de583b87716e351e4fb60d687b9330877dbaf4",
+      "data": "Some Data",
+      "supported_markets": [
+        "3"
+      ]
+    }
+  ],
+  "runtime_config": {
+    "ws_url": "wss://arb-sepolia.g.alchemy.com/v2/somePlaceHolder",
+    "http_url": "https://arb-sepolia.g.alchemy.com/v2/l86jFYjBFWZTQMRof96TpIGigjbZMUcr",
+    "private_key": "c53dd8e14d0a4f8fa7b87c66adfc0d6197159732fd29517ea6783741423b9f54",
+    "proof_market_place": "0xc05d689b341d84900f0d0ce36f35adabfb57f68d",
+    "generator_registry": "0x4743a2c7a96c9fbed8b7ead980ad01822f9711db",
+    "start_block": 115108807,
+    "chain_id": 421614,
+    "payment_token": "0x8230d71d809718132c2054704f5e3af1b86b669c",
+    "staking_token": "0xb5570d4d39dd20f61def7c0d6846790360b89a18",
+    "attestation_verifier": "0x63eef1576b477aa60bfd7300b2c85b887639ac1b",
+    "entity_registry": "0x457d42573096b339ba48be576e9db4fc5f186091",
+    "markets": {
+      "3": {
+        "port": "8080",
+        "ivs_url": "http://localhost:8080/api/checkInput"
       }
     }
+  }
 }'
 
 make_request "http://$IP:5000/api/startProgram" "POST" '{
