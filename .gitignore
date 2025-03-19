@@ -28,3 +28,5 @@ matching_engine_config/*
 result*
 
 *.log
+*.eif
+oyster-cvm_v2.0.1_darwin_arm64

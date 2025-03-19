@@ -1,6 +1,6 @@
 services:
   cp:
-    image: cp:latest
+    image: akshay111meher/provers:latest
     init: true
     network_mode: host
     restart: unless-stopped
