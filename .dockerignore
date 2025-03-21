@@ -12,3 +12,5 @@ result
 scripts/*
 
 *.log
+
+generator_config/

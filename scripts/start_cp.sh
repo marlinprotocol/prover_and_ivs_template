@@ -42,8 +42,8 @@ make_request "http://$IP:5000/api/generatorConfigSetup" "POST" '{
     }
   ],
   "runtime_config": {
-    "ws_url": "wss://arb-sepolia.g.alchemy.com/v2/somePlaceHolder",
-    "http_url": "https://arb-sepolia.g.alchemy.com/v2/l86jFYjBFWZTQMRof96TpIGigjbZMUcr",
+    "ws_url": "wss://arb-sepolia.g.alchemy.com/v2/placeHolderToLaterRemove",
+    "http_url": "https://sepolia-rollup.arbitrum.io/rpc",
     "private_key": "c53dd8e14d0a4f8fa7b87c66adfc0d6197159732fd29517ea6783741423b9f54",
     "proof_market_place": "0xc05d689b341d84900f0d0ce36f35adabfb57f68d",
     "generator_registry": "0x4743a2c7a96c9fbed8b7ead980ad01822f9711db",
